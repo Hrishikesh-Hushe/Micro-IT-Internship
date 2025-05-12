@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>ShopEase - Your Online Store</title>
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      max-width: 350px;
+      margin: auto;
+    }
+    h1, h2, h3 {
+      font-weight: 700;
+      color: #2c3e50;
+    }
+    button {
+      cursor: pointer;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: default;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    header {
+      background: #3498db;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      user-select: none;
+    }
+    .cart-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      position: relative;
+      padding: 5px 10px;
+    }
+    .cart-count {
+      position: absolute;
+      top: 0;
+      right: 5px;
+      background: #e74c3c;
+      color: white;
+      font-size: 0.75rem;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      font-weight: 700;
+    }
+
+    main {
+      padding: 15px 15px 100px 15px;
+      flex-grow: 1;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgb(0 0 0 / 0.07);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.2s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 18px rgb(0 0 0 / 0.12);
+    }
+    .product-img {
+      width: 100%;
+      height: 140px;
+      object-fit: contain;
+      background: #f9fafb;
+      border-bottom: 1px solid #ddd;
+    }
+    .product-info {
+      padding: 10px 12px 15px 12px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .product-title {
+      font-size: 1rem;
+      margin-bottom: 6px;
+      color: #2c3e50;
+      user-select: none;
+    }
+    .product-price {
+      font-weight: 700;
+      color: #27ae60;
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      user-select: none;
+    }
+    .add-to-cart {
+      background: #3498db;
+      color: white;
+      padding: 8px 0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+    .add-to-cart:hover {
+      background: #2980b9;
+    }
+
+    /* Cart sidebar modal */
+    #cart-modal {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 320px;
+      max-width: 100vw;
+      height: 100vh;
+      background: white;
+      box-shadow: -5px 0 20px rgba(0,0,0,0.15);
+      transition: right 0.35s ease;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+    #cart-modal.open {
+      right: 0;
+    }
+    #cart-header {
+      padding: 15px 18px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #cart-header h2 {
+      font-size: 1.25rem;
+      user-select: none;
+    }
+    #close-cart {
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #7f8c8d;
+      background: none;
+      border: none;
+      padding: 0;
+      user-select: none;
+    }
+
+    #cart-content {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 15px 12px;
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 12px;
+    }
+    .cart-item-img {
+      width: 65px;
+      height: 65px;
+      object-fit: contain;
+      border-radius: 10px;
+      background: #f9fafb;
+      margin-right: 12px;
+      user-select: none;
+    }
+    .cart-item-info {
+      flex-grow: 1;
+    }
+    .cart-item-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      color: #34495e;
+      user-select: none;
+    }
+    .cart-item-price {
+      font-weight: 700;
+      color: #27ae60;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      user-select: none;
+    }
+    .cart-item-qty {
+      display: flex;
+      align-items: center;
+    }
+    .qty-btn {
+      background: #3498db;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      border-radius: 6px;
+      width: 26px;
+      height: 26px;
+      line-height: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 4px;
+      user-select: none;
+      border: none;
+    }
+    .qty-display {
+      font-weight: 700;
+      user-select: none;
+      min-width: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .remove-btn {
+      background: transparent;
+      border: none;
+      color: #e74c3c;
+      cursor: pointer;
+      font-size: 1.1rem;
+      margin-left: 10px;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    .remove-btn:hover {
+      color: #c0392b;
+    }
+
+    #cart-footer {
+      border-top: 1px solid #ddd;
+      padding: 15px 18px;
+      text-align: center;
+      position: relative;
+      user-select: none;
+    }
+    #cart-total {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+    #checkout-btn {
+      background: #27ae60;
+      color: white;
+      padding: 12px 0;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      border: none;
+    }
+    #checkout-btn:disabled {
+      background: #95a5a6;
+      cursor: default;
+    }
+    #checkout-btn:hover:not(:disabled) {
+      background: #219150;
+    }
+
+    /* Checkout modal */
+    #checkout-modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+    #checkout-modal.open {
+      display: flex;
+    }
+    #checkout-form {
+      background: white;
+      border-radius: 14px;
+      padding: 20px 24px;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    #checkout-form h2 {
+      margin-bottom: 15px;
+      font-weight: 700;
+      color: #34495e;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      user-select: none;
+      color: #2c3e50;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 14px;
+      border-radius: 8px;
+      border: 1.8px solid #ccc;
+      font-size: 1rem;
+      transition: border-color 0.25s ease;
+      resize: vertical;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    textarea {
+      min-height: 70px;
+    }
+    #form-btns {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    #submit-order {
+      flex-grow: 1;
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 12px 0;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    #submit-order:hover {
+      background: #1e8449;
+    }
+    #cancel-checkout {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 12px 0;
+      border-radius: 8px;
+      width: 120px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    #cancel-checkout:hover {
+      background: #b23022;
+    }
+
+    /* Success message */
+    #success-message {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #27ae60;
+      color: white;
+      padding: 20px 30px;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(39,174,96,0.3);
+      font-weight: 700;
+      font-size: 1.2rem;
+      display: none;
+      user-select: none;
+      z-index: 60;
+    }
+    #success-message.show {
+      display: block;
+      animation: fadeInOut 3s forwards;
+    }
+    @keyframes fadeInOut {
+      0% {opacity: 0; transform: translate(-50%, -60%);}
+      10%, 90% {opacity: 1; transform: translate(-50%, -50%);}
+      100% {opacity: 0; transform: translate(-50%, -40%);}
+    }
+
+    /* Scrollbar style for cart */
+    #cart-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    #cart-content::-webkit-scrollbar-thumb {
+      background: #3498db;
+      border-radius: 10px;
+    }
+    #cart-content::-webkit-scrollbar-track {
+      background: #eee;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 350px) {
+      header, main {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      #cart-modal {
+        width: 100vw;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>ShopEase</h1>
+    <button class="cart-btn" id="open-cart" aria-label="Open Cart" title="View Cart">
+      🛒
+      <span class="cart-count" id="cart-count" aria-live="polite" aria-atomic="true">0</span>
+    </button>
+  </header>
+
+  <main>
+    <section class="product-grid" id="product-grid">
+      <!-- Products Will Be Injected Here -->
+    </section>
+  </main>
+
+  <!-- Cart Sidebar -->
+  <aside id="cart-modal" aria-labelledby="cart-title" role="dialog" aria-modal="true" aria-hidden="true">
+    <header id="cart-header">
+      <h2 id="cart-title">Shopping Cart</h2>
+      <button id="close-cart" aria-label="Close Cart">×</button>
+    </header>
+    <div id="cart-content" tabindex="0" aria-live="polite" aria-relevant="all">
+      <!-- Cart items dynamically inserted here -->
+    </div>
+    <footer id="cart-footer">
+      <div id="cart-total">Total: $0.00</div>
+      <button id="checkout-btn" disabled>Checkout</button>
+    </footer>
+  </aside>
+
+  <!-- Checkout Modal -->
+  <div id="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title" aria-hidden="true">
+    <form id="checkout-form" novalidate>
+      <h2 id="checkout-title">Checkout</h2>
+      <label for="name">Full Name *</label>
+      <input type="text" id="name" name="name" required autocomplete="name" aria-required="true" />
+      
+      <label for="email">Email *</label>
+      <input type="email" id="email" name="email" required autocomplete="email" aria-required="true" />
+      
+      <label for="address">Address *</label>
+      <textarea id="address" name="address" required rows="2" aria-required="true"></textarea>
+      
+      <label for="payment">Payment Info *</label>
+      <input type="text" id="payment" name="payment" placeholder="Card number (dummy)" required aria-required="true" autocomplete="cc-number" />
+      
+      <div id="form-btns">
+        <button type="submit" id="submit-order">Place Order</button>
+        <button type="button" id="cancel-checkout">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="success-message" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+  (() => {
+    // Product data - in a real app, this would come from a backend
+    const products = [
+      {
+        id: 'p1',
+        name: 'Wireless Headphones',
+        price: 59.99,
+        image: 'https://images.unsplash.com/photo-1512499617640-c2f999128312?auto=format&fit=crop&w=300&q=60'
+      },
+      {
+        id: 'p2',
+        name: 'Stylish Backpack',
+        price: 74.5,
+        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=300&q=60'
+      },
+      {
+        id: 'p3',
+        name: 'Smart Watch',
+        price: 149.99,
+        image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=300&q=60'
+      },
+      {
+        id: 'p4',
+        name: 'Sneakers',
+        price: 89.95,
+        image: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=300&q=60'
+      },
+      {
+        id: 'p5',
+        name: 'Sunglasses',
+        price: 29.99,
+        image: 'https://images.unsplash.com/photo-1509228627152-4c2ec8bdfb8a?auto=format&fit=crop&w=300&q=60'
+      },
+      {
+        id: 'p6',
+        name: 'Leather Wallet',
+        price: 39.99,
+        image: 'https://images.unsplash.com/photo-1533387520709-2777a72127c1?auto=format&fit=crop&w=300&q=60'
+      }
+    ];
+
+    // Selectors
+    const productGrid = document.getElementById('product-grid');
+    const cartModal = document.getElementById('cart-modal');
+    const openCartBtn = document.getElementById('open-cart');
+    const closeCartBtn = document.getElementById('close-cart');
+    const cartContent = document.getElementById('cart-content');
+    const cartCountElem = document.getElementById('cart-count');
+    const cartTotalElem = document.getElementById('cart-total');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    const checkoutModal = document.getElementById('checkout-modal');
+    const checkoutForm = document.getElementById('checkout-form');
+    const cancelCheckoutBtn = document.getElementById('cancel-checkout');
+    const successMessageDiv = document.getElementById('success-message');
+
+    // Cart data structure: { productId: { ...product, quantity } }
+    let cart = {};
+
+    // Utility functions
+    const formatPrice = (price) => '$' + price.toFixed(2);
+
+    // Render products
+    function renderProducts() {
+      productGrid.innerHTML = '';
+      products.forEach(product => {
+        const card = document.createElement('article');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img tabindex="0" src="${product.image}" alt="${product.name}" class="product-img" />
+          <div class="product-info">
+            <h3 class="product-title">${product.name}</h3>
+            <div class="product-price">${formatPrice(product.price)}</div>
+            <button class="add-to-cart" aria-label="Add ${product.name} to cart" data-id="${product.id}">Add to Cart</button>
+          </div>
+        `;
+        productGrid.appendChild(card);
+      });
+    }
+
+    // Update cart count
+    function updateCartCount() {
+      const count = Object.values(cart).reduce((acc, item) => acc + item.quantity, 0);
+      cartCountElem.textContent = count;
+      if (count === 0) {
+        checkoutBtn.disabled = true;
+      } else {
+        checkoutBtn.disabled = false;
+      }
+    }
+
+    // Render cart items
+    function renderCart() {
+      cartContent.innerHTML = '';
+      if (Object.keys(cart).length === 0) {
+        cartContent.innerHTML = '<p style="color:#777; user-select:none;">Your cart is empty.</p>';
+        cartTotalElem.textContent = 'Total: $0.00';
+        updateCartCount();
+        return;
+      }
+      // For each cart item
+      Object.values(cart).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <img src="${item.image}" alt="${item.name}" class="cart-item-img" />
+          <div class="cart-item-info">
+            <div class="cart-item-title">${item.name}</div>
+            <div class="cart-item-price">${formatPrice(item.price)}</div>
+            <div class="cart-item-qty" aria-label="Quantity controls for ${item.name}">
+              <button aria-label="Decrease quantity" class="qty-btn" data-action="decrement" data-id="${item.id}">–</button>
+              <div class="qty-display" aria-live="polite" aria-atomic="true">${item.quantity}</div>
+              <button aria-label="Increase quantity" class="qty-btn" data-action="increment" data-id="${item.id}">+</button>
+              <button aria-label="Remove ${item.name} from cart" class="remove-btn" data-action="remove" data-id="${item.id}">×</button>
+            </div>
+          </div>
+        `;
+        cartContent.appendChild(div);
+      });
+
+      // Calculate and update total
+      const total = Object.values(cart).reduce((acc, item) => acc + item.price * item.quantity, 0);
+      cartTotalElem.textContent = 'Total: ' + formatPrice(total);
+      updateCartCount();
+    }
+
+    // Add product to cart
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      if (cart[productId]) {
+        cart[productId].quantity += 1;
+      } else {
+        cart[productId] = {...product, quantity: 1};
+      }
+      renderCart();
+      openCart();
+    }
+
+    // Handle cart quantity change or removal
+    function handleCartAction(action, productId) {
+      const item = cart[productId];
+      if (!item) return;
+      if (action === 'increment') {
+        item.quantity += 1;
+      } else if (action === 'decrement') {
+        item.quantity -= 1;
+        if (item.quantity <= 0) {
+          delete cart[productId];
+        }
+      } else if (action === 'remove') {
+        delete cart[productId];
+      }
+      renderCart();
+    }
+
+    // Open cart sidebar
+    function openCart() {
+      cartModal.classList.add('open');
+      cartModal.setAttribute('aria-hidden', 'false');
+      // Focus trap for accessibility could be added here if desired
+      // Auto focus cart content
+      setTimeout(() => {
+        cartContent.focus();
+      }, 350);
+    }
+    // Close cart sidebar
+    function closeCart() {
+      cartModal.classList.remove('open');
+      cartModal.setAttribute('aria-hidden', 'true');
+      openCartBtn.focus();
+    }
+
+    // Open checkout modal
+    function openCheckout() {
+      checkoutModal.classList.add('open');
+      checkoutModal.setAttribute('aria-hidden', 'false');
+      checkoutForm.reset();
+      checkoutForm.elements.name.focus();
+    }
+    // Close checkout modal
+    function closeCheckout() {
+      checkoutModal.classList.remove('open');
+      checkoutModal.setAttribute('aria-hidden', 'true');
+      checkoutForm.reset();
+      checkoutBtn.focus();
+    }
+
+    // Show success message
+    function showSuccessMessage(message) {
+      successMessageDiv.textContent = message;
+      successMessageDiv.classList.add('show');
+      setTimeout(() => {
+        successMessageDiv.classList.remove('show');
+      }, 3000);
+    }
+
+    // Submit checkout form
+    function handleCheckoutSubmit(event) {
+      event.preventDefault();
+      if (!checkoutForm.checkValidity()) {
+        checkoutForm.reportValidity();
+        return;
+      }
+      // In a real app, submission to backend would happen here
+      // For demo, just clear cart and show success message
+      cart = {};
+      renderCart();
+      closeCheckout();
+      closeCart();
+      showSuccessMessage('Thank you! Your order has been placed.');
+    }
+
+    // Event listeners
+    document.addEventListener('click', e => {
+      // Add to cart button
+      if(e.target.classList.contains('add-to-cart')) {
+        const id = e.target.getAttribute('data-id');
+        addToCart(id);
+      }
+      // Open cart button
+      if(e.target === openCartBtn) {
+        openCart();
+      }
+      // Close cart button
+      if(e.target === closeCartBtn) {
+        closeCart();
+      }
+      // Cart quantity buttons & remove buttons
+      if(e.target.classList.contains('qty-btn') || e.target.classList.contains('remove-btn')) {
+        const id = e.target.getAttribute('data-id');
+        const action = e.target.getAttribute('data-action');
+        handleCartAction(action, id);
+      }
+      // Checkout button
+      if(e.target === checkoutBtn && !checkoutBtn.disabled) {
+        openCheckout();
+      }
+      // Cancel checkout
+      if(e.target === cancelCheckoutBtn) {
+        closeCheckout();
+      }
+      // Close checkout modal if clicking outside form
+      if(e.target === checkoutModal) {
+        closeCheckout();
+      }
+    });
+
+    // Keyboard accessibility for close buttons (Esc to close cart and checkout)
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape') {
+        if(checkoutModal.classList.contains('open')) {
+          closeCheckout();
+        } else if(cartModal.classList.contains('open')) {
+          closeCart();
+        }
+      }
+    });
+
+    // Submit checkout form
+    checkoutForm.addEventListener('submit', handleCheckoutSubmit);
+
+    // Initialize UI
+    renderProducts();
+    renderCart();
+
+  })();
+</script>
+
+</body>
+</html>
+
